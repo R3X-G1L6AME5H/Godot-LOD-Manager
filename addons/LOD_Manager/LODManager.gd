@@ -7,9 +7,9 @@ export (bool) var build = false
 export (bool) var track = false setget _set_track
 export (bool) var fade = false
 
-export (float, 0.01, 100) var default_lod1
-export (float, 0.01, 100) var default_lod2
-export (float, 0.01, 100) var default_lod3
+export (float, 0.01, 100) var default_lod1 = 4
+export (float, 0.01, 100) var default_lod2 = 8
+export (float, 0.01, 100) var default_lod3 = 16
 export (float, 0.0, 1.0)  var fade_in_delay = 0.5
 
 var chunk_web = {}
