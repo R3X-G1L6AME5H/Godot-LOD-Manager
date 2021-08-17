@@ -44,3 +44,20 @@ Your map is now ready for export. Export it as a glTF file. Its IMPORTANT to tic
 
 ![Image 6](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_6.PNG)
 
+### Step 7
+In Godot, open your project with the addon inside, and create a `Spatial` node. Under it, place another `Spatial`(Name it __"Manager"__) and a `Position3D`. Go to `res://addons/LODManager/` and place that script onto the manager node.
+
+![Image 7](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_7.PNG)
+
+### Step 8
+Pull your terrain into the scene tree and place it under the Manager. Right click on the imported instance and click `Make local`. If your meshes come under a `Spatial`, move them to be the child of the Manager, and delete that `Spatial`.
+
+![Image 8](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_8.PNG)
+
+### Step 9
+The last, and most important step is to rename the `MeshInstance`'s in a way that the Manager is going to understand. Select all the meshes that start with LOD1, right click, and batch rename. Here you can copy the contents in the image below. The important thing is to have all the LOD1 meshes named in a way that it has __"-lod1"__ at the end of it. Do this for LOD2, and LOD3, but change the suffix to __"-lod2"__ and __"-lod3"__, respectively. 
+
+![Image 9](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_9.PNG)
+
+## Step 10
+Go to the Manager node, set the `track_target` to the `Position3D` node we made on Step 7. Tick the `build` box, and tick the `track` box. Move the `Position3D` around a bit. Notice how chunks change their level of detail according to  
