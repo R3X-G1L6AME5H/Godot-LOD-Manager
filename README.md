@@ -59,5 +59,30 @@ The last, and most important step is to rename the `MeshInstance`'s in a way tha
 
 ![Image 9](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_9.PNG)
 
-## Step 10
-Go to the Manager node, set the `track_target` to the `Position3D` node we made on Step 7. Tick the `build` box, and tick the `track` box. Move the `Position3D` around a bit. Notice how chunks change their level of detail according to  
+### Step 10
+Go to the Manager node, set the `track_target` to the `Position3D` node we made on Step 7. Tick the `build` box, and tick the `track` box. Move the `Position3D` around a bit. Notice how chunks change their level of detail according to their distance from the `Position3D`.
+
+![Image 10](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_10.PNG)
+
+### Step ...
+From here on, you are free to place props on each of the chunks. As stated in the begining, this plugin works recursively. If you created a separate scene out of one of the __"-lod1"__ meshes you could place props on top of it, and as long as they have the "-lod1", "-lod2", or "-lod3" suffix, the manager will process them as well.
+
+The Manager has default lod distances, but you can make the LOD distances object specific, by putting the `res://addons/LODManager/LODObject.gd` script on the object you want to have specific LOD distances.
+
+With this design, you can specify large chunks to stay at LOD1 till the distance A, while making it's children stay on LOD1 till the distance B. The mountains fade slower than the trees, and trees slower than the pebbles on the road.
+
+## What can't it do?
+First of, I am still unsure of the impact on performance that simply hiding the object has vs. unloading it entirely. This, then, maybe isn't the best implementation performace wise.
+
+Secondly, there is the problem of far lights. It doesn't have to be lights per se, it's just that lights illustrate this issue the best. Imagine looking out in the distance at night. If you're out of town, you see many lights flashing. If we imagined that you were the player, then the chunk you were in would be LOD 1, and the city would be in LOD 2/3. What should happen is that the lights in the less detailed chunk should probably still show in the distance, even if they were of less quality. BUT, because the chunks are hidden, all their children are hidden with them. You CAN circumvent this by just placing the light object on the same level as the chunks. But the management the plugin is going for right now, would be a nightmare in such a scenario.
+
+Thirdly, speaking of lights, this plugin was only tested on Meshes so I don't know how, and if it will work on anything else.
+
+## TO DO LIST
+There are a few issues that may impede my game development process:
+- The afformentioned Mesh Management problem
+- Conic chunk loading (a method with which only the chunks that the player sees are loaded)
+- In case that making meshes invisible, doesn't have the desired performance, I'll probabilly try to make it load and unload meshes
+- The far light problem
+
+- A blanket category called: "Didn't think of it yet"
