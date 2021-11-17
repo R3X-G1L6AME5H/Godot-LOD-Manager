@@ -74,6 +74,8 @@ The Manager has default lod distances, but you can make the LOD distances object
 With this design, you can specify large chunks to stay at LOD1 till the distance A, while making it's children stay on LOD1 till the distance B. The mountains fade slower than the trees, and trees slower than the pebbles on the road.
 
 ## How to CHUNK
+Fundamentaly, the manager just disables its children. Them not being processed does improve performance, but on larger scales it does consume a lot of memory. Even so, the simple way its built hides a solution. Given that the manager descends the tree recursively, you can take a chunk and save it as a separate scene. As long as the node structure is intact, the manager will process it correctly. The answer to the question "how to chunk?" is simple. Make all chunks have `LODObject` as their root, and load them as a child of you LODManger. The management of loading and unloading the scenes would ultimately fall down to the developer, but displaying the nodes can always be handled by the manager.
+
 
 ## What can't it do?
 First of, I am still unsure of the impact on performance that simply hiding the object has vs. unloading it entirely. This, then, maybe isn't the best implementation performace wise.
@@ -86,7 +88,7 @@ Thirdly, speaking of lights, this plugin was only tested on Meshes so I don't kn
 There are a few issues that may impede my game development process:
 - The afformentioned Mesh Management problem
 - Conic chunk loading (a method with which only the chunks that the player sees are loaded)
-- In case that making meshes invisible, doesn't have the desired performance, I'll probabilly try to make it load and unload meshes
-- The far light problem
+- ~In case that making meshes invisible, doesn't have the desired performance, I'll probabilly try to make it load and unload meshes~ (Instancing chunks is now possible, even though their management ultimately falls down to the developer)
+- ~The far light problem~ (Fixed by the new grouping method)
 
 - A blanket category called: "Didn't think of it yet"
