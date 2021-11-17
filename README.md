@@ -7,9 +7,15 @@ There are only two scripts in this plugin. The `LODManager.gd` and `LODObject.gd
 
 You will notice a couple of properties in the Inspector when you select the Manger node. `Tracking Target` is ment for in-editor review. You pick a `Spatial` object, preferably a `Position3D` node, and the Manager will treat it as it would treat a player in-game. But before you can review your work, you need to build the map. For the manager to work, the nodes have to be grouped in a certain way. Every `-lodN` node must be under an `LODObject` node. This is so that its easier for the developer to manage props. An `LODObject` will take care of any `-lodN` node under it. The properties it has are applied to all the `-lodN` nodes that are its children. 
 
-As mentioned before, the Manager will descend the tree recursively, meaning that if an `LODObject` has an `LODObject` as its child, it will process that `LODObject` as well. Chances are that your imported (partitioned) game map will not be grouped properly, but it will sure be large. A 3x3 chunk map(excluding the foliage, and props; only the heightmap) that has 3 levels-of-detail per each chunk will be made up of 27 meshes. Imagine having to group so many meshes by hand; not to mention that your map will likely be much larger. This is why the `Group Levels Of Detail` property exists. It isn't really a property as much as its a hacky button (its a tickbox that unticks itself). When pressed, the Manager will go through all its children, and reparent them to `LODObject` nodes. There are a few things to keep in mind, however. Firstly, the grouping won't work unless the Manager is the root node of the tree(This is due to the way reparenting nodes on runtime works). If this is not done the nodes will just vanish. They will still be there, its just that you won't see them. Secondly, the manager builds groups from their `-lod1` node. If `a-lod2`, and `a-lod3` exist, but there is no `a-lod1`, then there will be no group `a`. 
+As mentioned before, the Manager will descend the tree recursively, meaning that if an `LODObject` has an `LODObject` as its child, it will process that `LODObject` as well. Chances are that your imported (partitioned) game map will not be grouped properly, but it will sure be large. A 3x3 chunk map(excluding the foliage, and props; only the heightmap) that has 3 levels-of-detail per each chunk will be made up of 27 meshes. Imagine having to group so many meshes by hand; not to mention that your map will likely be much larger. 
+
+This is why the `Group Levels Of Detail` property exists. It isn't really a property as much as its a hacky button (its a tickbox that unticks itself). When pressed, the Manager will go through all its children, and reparent them to `LODObject` nodes. There are a few things to keep in mind, however. Firstly, the grouping won't work unless the Manager is the root node of the tree(This is due to the way reparenting nodes on runtime works). If this is not done the nodes will just vanish. They will still be there, its just that you won't see them. Secondly, the manager builds groups from their `-lod1` node. If `a-lod2`, and `a-lod3` exist, but there is no `a-lod1`, then there will be no group `a`. 
+
+There are also `Show Only Lod N` properties, but they are quite self expainatory; just little quality-of-life improvements. 
 
 Now that the map is built, and the `Tracking Target` has been selected, you can review how it will look in-game by ticking the `Enable` property on the manager. The behavior will depend on the `LODObject` LOD properties, as you might imagine. While there is nothing preventing you, keep in mind that the script **won't work** if the condition __LOD1 < LOD2 < LOD3__ isn't satisfied. 
+
+Keep in mind that the manager **doesn't simply hide** nodes; it **disables** them. The object is made invisibl, and all its scripts, input processing, and collisions are turned off. Keep all your functional elements outside the Manager's reach, just so that you don't go scratching your head for hours wandering why the hell your script isn't working. (Or equally likely, why is my collision shape not where I placed it.) On that note, always keep collisions under LOD 1. Collisions also take up processing time, and a considerable amount of it. Unless you have some important physics that need to run in the distance, let the manager disable the collisions for you.  
 
 ## In practice...
 Let me take you through the process of using this plugin on a practical example, so that you may better comprehend how it works. For this example I shall demonstrate how to make a game map. For simplicity's sake, this map will be procedually generated.
@@ -52,35 +58,39 @@ In Godot, open your project with the addon inside, and create a `Spatial` node. 
 ![Image 7](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_7.PNG)
 
 ### Step 8
-Pull your terrain into the scene tree and place it under the Manager. Right click on the imported instance and click `Make local`. If your meshes come under a `Spatial`, move them to be the child of the Manager, and delete that `Spatial`.
+Double click on your .glb mesh in the Filesystem panel and open it as a new scene.
 
 ![Image 8](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_8.PNG)
 
 ### Step 9
-The last, and most important step is to rename the `MeshInstance`'s in a way that the Manager is going to understand. Select all the meshes that start with LOD1, right click, and batch rename. Here you can copy the contents in the image below. The important thing is to have all the LOD1 meshes named in a way that it has __"-lod1"__ at the end of it. Do this for LOD2, and LOD3, but change the suffix to __"-lod2"__ and __"-lod3"__, respectively. 
+This is the most important step. Rename the `MeshInstance`'s in a way that the Manager is going to understand. Select all the meshes that start with LOD1, right click, and batch rename. Here you can copy the contents in the image below. The important thing is to have all the LOD1 meshes named in a way that it has __"-lod1"__ at the end of it. Do this for LOD2, and LOD3, but change the suffix to __"-lod2"__ and __"-lod3"__, respectively. 
 
 ![Image 9](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_9.PNG)
 
 ### Step 10
-Go to the Manager node, set the `track_target` to the `Position3D` node we made on Step 7. Tick the `build` box, and tick the `track` box. Move the `Position3D` around a bit. Notice how chunks change their level of detail according to their distance from the `Position3D`.
+Now you can drag the LODManager.gd script onto your root node. Go ahead and tick the `Group Levels Of Detail` property. This should reorganize the meshes. You can now save this scene. Optionally, you could press one of the `Show Only Lod N` buttons, just to make it a bit more plesant to the eye.
 
 ![Image 10](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_10.PNG)
+
+### Step 11
+Lastly, instance your terrain in your main scene. Pick the `Tracking Target` for the manager and tick `Enable`. If no `Tracking Target` is chosen, the manager will just take the world source(aka. vector [0,0,0]) as the player position.
+
+![Image 11](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_11.PNG)
+![Image 12](https://raw.githubusercontent.com/R3X-G1L6AME5H/Godot-LOD-Manager/master/Example/Assets/DEMO_IMG/Step_12.PNG)
 
 ### Step ...
 From here on, you are free to place props on each of the chunks. As stated in the begining, this plugin works recursively. If you created a separate scene out of one of the __"-lod1"__ meshes you could place props on top of it, and as long as they have the "-lod1", "-lod2", or "-lod3" suffix, the manager will process them as well.
 
-The Manager has default lod distances, but you can make the LOD distances object specific, by putting the `res://addons/LODManager/LODObject.gd` script on the object you want to have specific LOD distances.
-
-With this design, you can specify large chunks to stay at LOD1 till the distance A, while making it's children stay on LOD1 till the distance B. The mountains fade slower than the trees, and trees slower than the pebbles on the road.
+With this design, you can specify large chunks to stay at LOD1 till the distance A, while making it's children stay on LOD1 till the distance B. The mountains fade slower than the trees, and the treesfade slower than the pebbles on the road.
 
 ## How to CHUNK
 Fundamentaly, the manager just disables its children. Them not being processed does improve performance, but on larger scales it does consume a lot of memory. Even so, the simple way its built hides a solution. Given that the manager descends the tree recursively, you can take a chunk and save it as a separate scene. As long as the node structure is intact, the manager will process it correctly. The answer to the question "how to chunk?" is simple. Make all chunks have `LODObject` as their root, and load them as a child of you LODManger. The management of loading and unloading the scenes would ultimately fall down to the developer, but displaying the nodes can always be handled by the manager.
 
 
 ## What can't it do?
-First of, I am still unsure of the impact on performance that simply hiding the object has vs. unloading it entirely. This, then, maybe isn't the best implementation performace wise.
+~First of, I am still unsure of the impact on performance that simply hiding the object has vs. unloading it entirely. This, then, maybe isn't the best implementation performace wise.~ **(loading/unloading is now possible)**
 
-Secondly, there is the problem of far lights. It doesn't have to be lights per se, it's just that lights illustrate this issue the best. Imagine looking out in the distance at night. If you're out of town, you see many lights flashing. If we imagined that you were the player, then the chunk you were in would be LOD 1, and the city would be in LOD 2/3. What should happen is that the lights in the less detailed chunk should probably still show in the distance, even if they were of less quality. BUT, because the chunks are hidden, all their children are hidden with them. You CAN circumvent this by just placing the light object on the same level as the chunks. But the management the plugin is going for right now, would be a nightmare in such a scenario.
+~Secondly, there is the problem of far lights. It doesn't have to be lights per se, it's just that lights illustrate this issue the best. Imagine looking out in the distance at night. If you're out of town, you see many lights flashing. If we imagined that you were the player, then the chunk you were in would be LOD 1, and the city would be in LOD 2/3. What should happen is that the lights in the less detailed chunk should probably still show in the distance, even if they were of less quality. BUT, because the chunks are hidden, all their children are hidden with them. You CAN circumvent this by just placing the light object on the same level as the chunks. But the management the plugin is going for right now, would be a nightmare in such a scenario.~ **(Fixed)**
 
 Thirdly, speaking of lights, this plugin was only tested on Meshes so I don't know how, and if it will work on anything else.
 
@@ -88,7 +98,7 @@ Thirdly, speaking of lights, this plugin was only tested on Meshes so I don't kn
 There are a few issues that may impede my game development process:
 - The afformentioned Mesh Management problem
 - Conic chunk loading (a method with which only the chunks that the player sees are loaded)
-- ~In case that making meshes invisible, doesn't have the desired performance, I'll probabilly try to make it load and unload meshes~ (Instancing chunks is now possible, even though their management ultimately falls down to the developer)
-- ~The far light problem~ (Fixed by the new grouping method)
+- ~In case that making meshes invisible, doesn't have the desired performance, I'll probabilly try to make it load and unload meshes~ **(Instancing chunks is now possible, even though their management ultimately falls down to the developer)**
+- ~The far light problem~ **(Fixed by the new grouping method)**
 
 - A blanket category called: "Didn't think of it yet"
