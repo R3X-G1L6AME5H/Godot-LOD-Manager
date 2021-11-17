@@ -2,7 +2,7 @@ tool
 extends Spatial
 
 const LOD_OBJECT = preload("res://addons/LOD_Manager/LODObject.gd")
-export (bool) var group_levels_of_distance = false setget _group_levels_of_distance
+export (bool) var group_levels_of_detail = false setget _group_levels_of_detail
 export (bool) var enable = false setget _enable
 
 export (NodePath) var tracking_target = null setget _set_target
@@ -23,8 +23,8 @@ func _set_owner_for_node_and_children(node, owner):
 	for child_node in node.get_children():
 		_set_owner_for_node_and_children(child_node, owner)
 
-func _group_levels_of_distance(val):
-	group_levels_of_distance = val
+func _group_levels_of_detail(val):
+	group_levels_of_detail = val
 	if val:
 		var current_node = find_node("*-lod1", false)
 		var counter = 0
