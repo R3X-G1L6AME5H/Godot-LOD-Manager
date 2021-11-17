@@ -4,6 +4,9 @@ extends Spatial
 const LOD_OBJECT = preload("res://addons/LOD_Manager/LODObject.gd")
 export (bool) var group_levels_of_detail = false setget _group_levels_of_detail
 export (bool) var enable = false setget _enable
+export (bool) var show_only_lod_1 = false setget _show_lod_1
+export (bool) var show_only_lod_2 = false setget _show_lod_2
+export (bool) var show_only_lod_3 = false setget _show_lod_3
 
 export (NodePath) var tracking_target = null setget _set_target
 var target_node : Node = null
@@ -59,6 +62,23 @@ func _group_levels_of_detail(val):
 		
 		print("LOD Manager created ", str(counter), " new knots.")
 
+"""
+SHOW ONLY ONE LEVEL OF DETAIL
+"""
+func _show_lod_1(val):
+	#show_only_lod_1 = val
+	if val == true:
+		_start_scan(1)
+
+func _show_lod_2(val):
+	#show_only_lod_2 = val
+	if val == true:
+		_start_scan(2)
+
+func _show_lod_3(val):
+	#show_only_lod_3 = val
+	if val == true:
+		_start_scan(3)
 
 """
 MANAGE ACTIVATION
@@ -88,28 +108,39 @@ func _process(_delta):
 	else:
 		PLAYER_POSITION = Vector3.ZERO
 	
-	for child in self.get_children():
-		if child is LOD_OBJECT:
-			_scan_node_tree(child)
+	_start_scan()
 
 """
 RECURSIVELY TRAVERSE THE TREE ENABLING AND DISABLING NODES
 """
-func _scan_node_tree( node : LOD_OBJECT ):
+func _start_scan(lod_mask : int = 0):
+	for child in self.get_children():
+		if child is LOD_OBJECT:
+			_scan_node_tree(child, lod_mask)
+
+func _scan_node_tree( node : LOD_OBJECT, lod_mask : int = 0 ):
 	var distance : float = (node.global_transform.origin - PLAYER_POSITION).length_squared()
 	
 	for child in node.get_children():
 		if child is LOD_OBJECT:
-			_scan_node_tree( child )
+			_scan_node_tree( child, lod_mask )
 		else:
-			if child.name.ends_with("-lod1") and distance < node.lod_1 * node.lod_1 or\
-			   child.name.ends_with("-lod2") and node.lod_1 * node.lod_1 <= distance and distance < node.lod_2 * node.lod_2 or \
-			   child.name.ends_with("-lod3") and node.lod_2 * node.lod_2 <= distance and distance < node.lod_3 * node.lod_3:
-				_tick_chunk(child, true)
-				#prints(child.name, "- VISIBLE", distance)
+			if lod_mask == 0:
+				if child.name.ends_with("-lod1") and distance < node.lod_1 * node.lod_1 or\
+				   child.name.ends_with("-lod2") and node.lod_1 * node.lod_1 <= distance and distance < node.lod_2 * node.lod_2 or \
+				   child.name.ends_with("-lod3") and node.lod_2 * node.lod_2 <= distance and distance < node.lod_3 * node.lod_3:
+					_tick_chunk(child, true)
+					#prints(child.name, "- VISIBLE", distance)
+				else:
+					_tick_chunk(child, false)
+					#prints(child.name, "- HIDDEN -", distance)
 			else:
-				_tick_chunk(child, false)
-				#prints(child.name, "- HIDDEN -", distance)
+				if child.name.ends_with("-lod1") and lod_mask == 1 or\
+				   child.name.ends_with("-lod2") and lod_mask == 2 or\
+				   child.name.ends_with("-lod3") and lod_mask == 3:
+					_tick_chunk(child, true)
+				else:
+					_tick_chunk(child, false)
 
 """
 ENABLE/DISABLE NODES
@@ -134,6 +165,4 @@ func _tick_chunk( chunk, toggle ):
 #func _step(val):
 #	step = val
 #	if step == true:
-#		for child in self.get_children():
-#			if child is LOD_OBJECT:
-#				_scan_node_tree(child)
+#		_start_scan()
