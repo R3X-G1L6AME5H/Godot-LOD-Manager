@@ -90,9 +90,9 @@ func _enable(val):
 func _set_target(val):
 	if val:
 		if get_node_or_null(val):
-			print("Node Exists")
+			#print("Node Exists")
 			if get_node(val).get("global_transform") != null:
-				print("Node has a position")
+				#print("Node has a position")
 				tracking_target = val
 				target_node = get_node(val)
 			else:
