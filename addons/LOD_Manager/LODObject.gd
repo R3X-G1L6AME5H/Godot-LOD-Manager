@@ -12,9 +12,10 @@ extends Spatial
 """
 
 
+## quick and dirty way for the [LODManager] to figure out if this node is of any interest
 const LOD_PLUGIN_ID = 1
 
-#### EDITOR VARIABLES
+## Distance values for each Level-of-Detail
 export (float) var lod_1 : float = 8
 export (float) var lod_2 : float = 16
 export (float) var lod_3 : float = 32

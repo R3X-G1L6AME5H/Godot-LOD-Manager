@@ -1,19 +1,46 @@
 tool
 extends Spatial
 
+"""
+	Level-of-Detail Manager
+		by Nemo Czanderlitch/Nino Čandrlić
+			@R3X-G1L       (godot assets store)
+			R3X-G1L6AME5H  (github)
+
+	The master script; Measures distances, and toggles visibility.
+	It descends the tree recursively, and only depends upon the name of its
+	child nodes; So long as the node is a child of this node, and has a name
+	that ends in either "-lod1", "-lod2", or "-lod3", it will be accounted for.
+	In addition it can target a node as its center-of-attention.
+
+	In addition to that it also helps with automatic mesh grouping
+	(provided that a correct naming scheme is used, check github for an example).
+"""
+
 const LOD_OBJECT = preload("res://addons/LOD_Manager/LODObject.gd")
+
+
+## Take child meshes under this node and reorganize them (depends upon the naming scheme; check github for example)
 export (bool) var group_levels_of_detail = false setget _group_levels_of_detail
+## Enables the _process function i.e. it runs
 export (bool) var enable = false setget _enable
+
+## Toggles visibility on appropriate meshes, according to their LOD
 export (bool) var show_only_lod_1 = false setget _show_lod_1
 export (bool) var show_only_lod_2 = false setget _show_lod_2
 export (bool) var show_only_lod_3 = false setget _show_lod_3
 
+
+## Defines what the object of interest is(from which all the distances get calculated)
+## 		Can be used for debug in the editor; or as a marker for the player on runtime
 export (NodePath) var tracking_target = null setget _set_target
 var target_node : Node = null
 var PLAYER_POSITION := Vector3.ZERO
 
+
 """
-HANDLE BUTTON PRESS FOR REOGANIZING MESHES
+THE LOD AUTOMATIC GROUPING pt.1
+	Funky stuff required to reparent nodes in the Editor
 """
 func _reparent_node(node_to_reparent, new_parent):
 	var old_parent = node_to_reparent.get_parent()
@@ -26,6 +53,10 @@ func _set_owner_for_node_and_children(node, owner):
 	for child_node in node.get_children():
 		_set_owner_for_node_and_children(child_node, owner)
 
+"""
+THE LOD AUTOMATIC GROUPING pt.1
+	The actual reorganizing algorithm
+"""
 func _group_levels_of_detail(val):
 	group_levels_of_detail = val
 	if val:
@@ -64,6 +95,7 @@ func _group_levels_of_detail(val):
 
 """
 SHOW ONLY ONE LEVEL OF DETAIL
+(boilerplate)
 """
 func _show_lod_1(val):
 	#show_only_lod_1 = val
@@ -82,6 +114,7 @@ func _show_lod_3(val):
 
 """
 MANAGE ACTIVATION
+(more boilerplate)
 """
 func _enable(val):
 	enable = val
@@ -102,6 +135,9 @@ func _set_target(val):
 			tracking_target = null
 			target_node = null
 
+"""
+THE PROCESS FUNCTION
+"""
 func _process(_delta):
 	if target_node:
 		PLAYER_POSITION = target_node.global_transform.origin
@@ -112,19 +148,27 @@ func _process(_delta):
 
 """
 RECURSIVELY TRAVERSE THE TREE ENABLING AND DISABLING NODES
+	lod_mask - which LOD Layer is filtered; i.e. forced to show.
+				Used by the debug buttons above.
+				(if 0; this functionality is ignored)
 """
+## Head Part
 func _start_scan(lod_mask : int = 0):
 	for child in self.get_children():
 		if child is LOD_OBJECT:
 			_scan_node_tree(child, lod_mask)
 
+## Recursive Part
 func _scan_node_tree( node : LOD_OBJECT, lod_mask : int = 0 ):
 	var distance : float = (node.global_transform.origin - PLAYER_POSITION).length_squared()
 	
 	for child in node.get_children():
 		if child is LOD_OBJECT:
+			#### Recursion appears here
 			_scan_node_tree( child, lod_mask )
+
 		else:
+			#### I.E.
 			if lod_mask == 0:
 				if child.name.ends_with("-lod1") and distance < node.lod_1 * node.lod_1 or\
 				   child.name.ends_with("-lod2") and node.lod_1 * node.lod_1 <= distance and distance < node.lod_2 * node.lod_2 or \
@@ -144,6 +188,8 @@ func _scan_node_tree( node : LOD_OBJECT, lod_mask : int = 0 ):
 
 """
 ENABLE/DISABLE NODES
+	chunk - the node being disabled/enabled
+	toggle - the state (T/F)(Enable/Disable)
 """
 func _tick_chunk( chunk, toggle ):
 	if chunk.visible != toggle:
