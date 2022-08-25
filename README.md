@@ -2,6 +2,9 @@
 ## In summary...
 A simple plugin that covers for the Godot's still missing Level of Detail management. It's a tool to manage world maps. It works recursively, meaning it can manage LOD Objects under other LOD Objects. This way you don't have to worry about managing every single prop. Futhermore this allows you to edit the world map chunk by chunk.
 
+![Example of an LOD level](http://qt-ent.com/PolyWorld/wp-content/uploads/2014/12/LODs-1.gif)
+
+
 ## Usage...
 Only two scripts are in this plugin. The `LODManager.gd` and `LODObject.gd`. You put `LODManager.gd` on a `Spatial` node, and then put every static object under it. The manager will process anything with the built-in `visible` property; a `MeshInstace` for example. The objects need to have either one of `-lod1`, `-lod2`, `-lod3` suffixes on it, else the Manager will ignore it. `-lod1` objects are of the highest quality, and `-lod3` objects are less so.
 
